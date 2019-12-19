@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<base href="https://cdn.rawgit.com/download/polymer-cdn/2.6.0/lib/">
+<script src="webcomponentsjs/webcomponents-loader.js"></script>
+<link rel="import" href="iron-ajax/iron-ajax.html">
+<link rel="import" href="polymer/polymer-element.html">
+
+
+<!--************   PADRE   ********************************************************************-->
+<dom-module id="componente-principal">
+	<template>
+		<style>
+
+			:host hr{
+				margin-top: 15px;	
+
+			}
+			:host #main{
+				border: 1px solid green;
+				width: 25%;
+							
+			}
+
+			:host #labels{
+				border: 1px solid green;
+				width: 95%;
+				margin: 0 auto;
+							
+			}
+
+			
+		</style>
+		
+		<div id="main">
+			<h1>Nested Components</h1>
+			<div id="labels">
+				<p>SelectedItem: {{selectedItem}} </p>
+				<p>SelectedValue: {{selectedValue}}</p>
+				<p>NewValue: {{newValue}} </p>
+
+				<h1></h1>
+				
+			</div>
+			<hr>
+			<agregar-peliculas item={{newValue}} pasar-peli="{{nuevaPeliculaAdd}}"></agregar-peliculas>
+			
+			<editar-peliculas selected={{selectedValue}} pelicula="[[editarPeli]]"></editar-peliculas>
+			<listar-peliculas lista="{{peliculas}}" peli-editar={{editarPeli}} indice="{{selectedItem}}"></listar-peliculas>
+			
+
+			</div>
+		
+	</template>
+	<script>
+		class ComponentePrincipal extends Polymer.Element {
+    static get is() { return "componente-principal"; }
+    static get properties() {
+      return {
+        newValue: {
+          type: String,
+          observer: "observerNewValue"
+          
+        },
+        selectedValue:{
+          type: String
+        },
+        nuevaPeliculaAdd:{
+        	type: String,
+        	value: "---"
+        },
+        peliculas:{
+        	type: Array,        	
+        },
+        editarPeli:{
+        	type: String,
+        },
+        selectedItem:{
+        	type: Number,
+        }
+      };      
+    }
+
+    ready(){
+    	super.ready()
+    	console.log(this.nuevaPeliculaAdd)
+    }
+
+    observerNewValue(a,b){
+    	console.log(a,b);
+    	this.push("peliculas",a);
+    }
+
+    
+    
+    
+  }
+  customElements.define(ComponentePrincipal.is, ComponentePrincipal);
+	</script>
+</dom-module>
+
+
+
+
+
+<!--*******   HIJO 1    **************************************************************************-->
+
+<dom-module id="agregar-peliculas">
+	<template>
+		<style>
+			:host #new-item{
+				border:1px solid yellow;
+				width: 95%;
+				height: 30px;
+				margin: 0 auto;
+				padding-top: 10px;
+			}
+			
+		</style>
+		
+		
+		<div id="new-item">
+			<input type="text" name="" id="newMovie" value="{{pasarPeli::input}}">
+			<button on-click="add">Add</button>
+		</div>
+		<hr>
+		
+	</template>
+	<script>
+		class AgregarPeliculas extends Polymer.Element {
+    static get is() { return "agregar-peliculas"; }
+    static get properties() {
+      return {
+        item: {
+           type: String,
+           notify: true,
+        },
+        pasarPeli:{
+        	type: String,
+        	notify: true,
+        },
+      };      
+    }
+
+
+    add(){
+    	var nuevaPeli = this.$.newMovie.value;
+    	this.set('item',nuevaPeli)
+    	console.log(nuevaPeli)
+    	this.set("pasarPeli", nuevaPeli)
+    }
+
+        
+    
+  }
+  customElements.define(AgregarPeliculas.is, AgregarPeliculas);
+	</script>
+</dom-module>
+
+
+<!--*********************************************************************************-->
+
+
+<!--********   HIJO2   *************************************************************************-->
+
+<dom-module id="editar-peliculas">
+	<template>
+		<style>
+			:host #editar{
+				border:1px solid blue;
+				width: 95%;
+				height: 30px;
+				margin: 0 auto;
+				padding-top: 10px;
+			}
+			
+		</style>
+
+		
+		<div id="editar">
+			<input type="text" name="" value={{selected::input}}>
+		</div>
+		<hr>
+		
+	</template>
+	<script>
+		class EditarPeliculas extends Polymer.Element {
+    static get is() { return "editar-peliculas"; }
+    static get properties() {
+      return {
+        selected: {
+          type: String,
+          notify: true,         
+        },
+        pelicula:{
+          type: String,
+          notify: true,
+          observer: "_onChanged"
+        }
+      };      
+    }
+
+    _onChanged(){
+    	
+    	this.selected = this.pelicula
+    }
+
+    ready(){
+    	super.ready()
+    	console.log("********")
+    	console.log(this.pelicula)
+    }
+
+
+    
+  }
+  customElements.define(EditarPeliculas.is, EditarPeliculas);
+	</script>
+</dom-module>
+
+
+<!--*********************************************************************************-->
+
+
+<!--********   HIJO3   *************************************************************************-->
+
+<dom-module id="listar-peliculas">
+	<template>
+		<style>
+			:host #listar{
+				border:1px solid red;
+				width: 95%;
+				height: auto;
+				margin: 0 auto;
+				padding-top: 15px;
+			}
+
+			:host editar-peliculas{
+				
+			}
+			:host componente-principal{
+				display: none;
+			}
+			
+		</style>
+		
+		
+		<div id="listar">			
+			<template is="dom-repeat" items="{{lista}}">
+				<button on-click="remove">Remove</button>
+				<input type="text" name="" on-focus="_focus" value="[[item]]"><br>				
+			</template>
+			</div>
+		<hr>
+		
+	</template>
+	<script>
+		class ListarPeliculas extends Polymer.Element {
+    static get is() { return "listar-peliculas"; }
+    static get properties() {
+      return {
+        lista: {
+          type: Array,
+          value: [],
+          notify: true,     
+        },
+        peliEditar:{
+          type: String,
+          notify: true          
+        },
+        nuevapeli:{
+        	type: String,
+        	value:''
+        },
+        indice:{
+        	type: Number,
+        	notify: true
+        },
+      };
+
+    }
+    remove(e){
+    	this.lista.splice(e.model.index, 1)
+    	console.log(this.lista);
+    	    	
+    }
+
+    _focus(e){
+    	this.peliEditar = e.srcElement.value;
+    	this.indice = e.model.index;
+    }   
+    
+  }
+  customElements.define(ListarPeliculas.is, ListarPeliculas);
+	</script>
+</dom-module>
+
+
+<!--*********************************************************************************-->
+
+
+<componente-principal></componente-principal>
+
+
+</body>
+</html>
